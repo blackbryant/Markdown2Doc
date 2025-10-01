@@ -1,0 +1,83 @@
+﻿# Visual Studio / .NET
+.vs/
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build outputs
+[Bb]in/
+[Oo]bj/
+*.exe
+*.dll
+*.pdb
+
+# NuGet
+packages/
+*.nupkg
+.nuget/
+
+# Package/lock files (older project types)
+project.lock.json
+project.fragment.lock.json
+
+# Publish
+*.Publish.xml
+*.pubxml
+*.publishsettings
+publish/
+publish/**
+
+# Rider / JetBrains
+.idea/
+*.sln.iml
+
+# ReSharper
+_ReSharper*/
+*.DotSettings.user
+
+# Logs / temp
+*.log
+*.tmp
+*.temp
+*.cache
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Database / local data files (不要把本機資料庫上傳)
+*.mdf
+*.ldf
+*.sqlite
+*.db
+*.db3
+
+# Secrets / local config
+secrets.json
+local.settings.json
+.env
+appsettings.*.Local.json
+*.key
+*.pem
+
+# Packages / library folders sometimes used
+lib/
+packages/
+
+# Generated files you typically don't need to track
+# (注意：Designer.cs 檔通常要 commit，別忽略)
+*.generated.cs
+
+# Other IDE / OS
+*.DS_Store
+*.class
+*.orig
+*.swp
+
+# Optional: If you use node-based tools in the project
+node_modules/
+
+# Optional: temporary pandoc / export temp files
+*.html~
+*.pdf~

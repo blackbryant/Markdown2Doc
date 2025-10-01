@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36518.9 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Markdown2Doc", "Markdown2Doc\Markdown2Doc.csproj", "{AEBCF42B-C449-41B4-8AF1-A132F803A2CC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AEBCF42B-C449-41B4-8AF1-A132F803A2CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AEBCF42B-C449-41B4-8AF1-A132F803A2CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AEBCF42B-C449-41B4-8AF1-A132F803A2CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AEBCF42B-C449-41B4-8AF1-A132F803A2CC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F68F1AB2-2E3F-450F-8F56-03D66321F4FC}
+	EndGlobalSection
+EndGlobal
