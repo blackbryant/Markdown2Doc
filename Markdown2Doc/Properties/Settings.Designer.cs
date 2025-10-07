@@ -58,5 +58,29 @@ namespace Markdown2Doc.Properties {
                 this["output"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("填寫路徑")]
+        public string wkhtmltopdfPath {
+            get {
+                return ((string)(this["wkhtmltopdfPath"]));
+            }
+            set {
+                this["wkhtmltopdfPath"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://wkhtmltopdf.org/downloads.html")]
+        public string downloadUrl2 {
+            get {
+                return ((string)(this["downloadUrl2"]));
+            }
+            set {
+                this["downloadUrl2"] = value;
+            }
+        }
     }
 }

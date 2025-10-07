@@ -36,6 +36,10 @@
             label3 = new Label();
             txtOutputPath = new TextBox();
             btnSaveOutputPath = new Button();
+            txtWkPath = new TextBox();
+            label5 = new Label();
+            btnWkhtmlpdf = new Button();
+            linkLabel2 = new LinkLabel();
             SuspendLayout();
             // 
             // txtEnvPath
@@ -49,9 +53,9 @@
             // 
             btnCheckEnv.Location = new Point(428, 114);
             btnCheckEnv.Name = "btnCheckEnv";
-            btnCheckEnv.Size = new Size(120, 37);
+            btnCheckEnv.Size = new Size(162, 37);
             btnCheckEnv.TabIndex = 4;
-            btnCheckEnv.Text = "檢查環境變數";
+            btnCheckEnv.Text = "設定Pandoc路徑";
             btnCheckEnv.UseVisualStyleBackColor = true;
             btnCheckEnv.Click += btnCheckEnv_Click;
             // 
@@ -80,41 +84,82 @@
             label2.AutoSize = true;
             label2.Location = new Point(12, 83);
             label2.Name = "label2";
-            label2.Size = new Size(161, 19);
+            label2.Size = new Size(213, 19);
             label2.TabIndex = 7;
-            label2.Text = "Step2. 設定執行擋路徑";
+            label2.Text = "Step2. 設定Pandoc執行擋路徑";
             // 
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new Point(12, 170);
+            label3.Location = new Point(11, 266);
             label3.Name = "label3";
             label3.Size = new Size(146, 19);
             label3.TabIndex = 8;
-            label3.Text = "Step3. 設定輸出目錄";
+            label3.Text = "Step4. 設定輸出目錄";
             // 
             // txtOutputPath
             // 
-            txtOutputPath.Location = new Point(12, 208);
+            txtOutputPath.Location = new Point(11, 297);
             txtOutputPath.Name = "txtOutputPath";
             txtOutputPath.Size = new Size(400, 27);
             txtOutputPath.TabIndex = 9;
             // 
             // btnSaveOutputPath
             // 
-            btnSaveOutputPath.Location = new Point(428, 202);
+            btnSaveOutputPath.Location = new Point(428, 291);
             btnSaveOutputPath.Name = "btnSaveOutputPath";
-            btnSaveOutputPath.Size = new Size(120, 36);
+            btnSaveOutputPath.Size = new Size(162, 36);
             btnSaveOutputPath.TabIndex = 10;
             btnSaveOutputPath.Text = "儲存輸出路徑";
             btnSaveOutputPath.UseVisualStyleBackColor = true;
             btnSaveOutputPath.Click += btnSaveOutputPath_Click;
+            // 
+            // txtWkPath
+            // 
+            txtWkPath.Location = new Point(11, 201);
+            txtWkPath.Name = "txtWkPath";
+            txtWkPath.Size = new Size(400, 27);
+            txtWkPath.TabIndex = 11;
+            // 
+            // label5
+            // 
+            label5.AutoSize = true;
+            label5.Location = new Point(11, 164);
+            label5.Name = "label5";
+            label5.Size = new Size(159, 19);
+            label5.TabIndex = 13;
+            label5.Text = "Step3. 設定wkhtmltox";
+            // 
+            // btnWkhtmlpdf
+            // 
+            btnWkhtmlpdf.Location = new Point(428, 201);
+            btnWkhtmlpdf.Name = "btnWkhtmlpdf";
+            btnWkhtmlpdf.Size = new Size(162, 36);
+            btnWkhtmlpdf.TabIndex = 14;
+            btnWkhtmlpdf.Text = "設定wkhtmltox路徑";
+            btnWkhtmlpdf.UseVisualStyleBackColor = true;
+            btnWkhtmlpdf.Click += btnWkhtmlpdf_Click;
+            // 
+            // linkLabel2
+            // 
+            linkLabel2.AutoSize = true;
+            linkLabel2.Location = new Point(169, 43);
+            linkLabel2.Name = "linkLabel2";
+            linkLabel2.Size = new Size(161, 19);
+            linkLabel2.TabIndex = 15;
+            linkLabel2.TabStop = true;
+            linkLabel2.Text = "Download Wkhtmltox";
+            linkLabel2.LinkClicked += linkLabel2_LinkClicked;
             // 
             // SettingForm
             // 
             AutoScaleDimensions = new SizeF(9F, 19F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            Controls.Add(linkLabel2);
+            Controls.Add(btnWkhtmlpdf);
+            Controls.Add(label5);
+            Controls.Add(txtWkPath);
             Controls.Add(btnSaveOutputPath);
             Controls.Add(txtOutputPath);
             Controls.Add(label3);
@@ -139,5 +184,9 @@
         private Label label3;
         private TextBox txtOutputPath;
         private Button btnSaveOutputPath;
+        private TextBox txtWkPath;
+        private Label label5;
+        private Button btnWkhtmlpdf;
+        private LinkLabel linkLabel2;
     }
 }

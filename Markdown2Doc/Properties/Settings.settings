@@ -11,5 +11,11 @@
     <Setting Name="output" Type="System.String" Scope="User">
       <Value Profile="(Default)">C:\</Value>
     </Setting>
+    <Setting Name="wkhtmltopdfPath" Type="System.String" Scope="User">
+      <Value Profile="(Default)">填寫路徑</Value>
+    </Setting>
+    <Setting Name="downloadUrl2" Type="System.String" Scope="User">
+      <Value Profile="(Default)">https://wkhtmltopdf.org/downloads.html</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

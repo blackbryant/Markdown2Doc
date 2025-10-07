@@ -1,4 +1,5 @@
 using Markdig;
+using Pandoc;
 using ScintillaNet.Abstractions.Enumerations;
 using ScintillaNet.WinForms;
 using ScintillaNet.WinForms.Collections;
@@ -30,6 +31,7 @@ namespace Markdown2Doc
         // pandoc parameters
         private string pandocPath = "pandoc"; // default to system path
         private string outputFolder = "c:\\" ; 
+        private string wkhtmltopdfPath = ""; // default to system path
 
 
         private System.Timers.Timer debounceTimer;
@@ -71,9 +73,10 @@ namespace Markdown2Doc
             btnSave = new ToolStripButton("Save");
             btnExportHtml = new ToolStripButton("Export HTML");
             btnWord = new ToolStripButton("Export Word");
+            btnPdf = new ToolStripButton("Export PDF");
 
             toolStrip.Items.AddRange(new ToolStripItem[] 
-                {btnSetting, btnOpen, btnSave, new ToolStripSeparator(), btnExportHtml , btnWord});
+                {btnSetting, btnOpen, btnSave, new ToolStripSeparator(), btnExportHtml , btnWord, btnPdf});
             toolStrip.Dock = DockStyle.Top;
             
             
@@ -251,6 +254,54 @@ namespace Markdown2Doc
 
             };
 
+            btnPdf.Click += (s, e) =>
+            {
+                if (!CheckWkhtmlPath())
+                {
+                    MessageBox.Show(this, "PDF export not implemented yet.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+                if (!CheckOutputPath())
+                {
+                    MessageBox.Show(this, "Output Folder Path not implemented yet.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                string md = scintilla.Text;
+                string tempMd = Path.Combine(Path.GetTempPath(), "temp.md");
+                File.WriteAllText(tempMd, md, Encoding.UTF8);
+                string outPdf= Path.Combine(outputFolder, "output.pdf");
+
+                // 建立 Process 啟動 pandoc
+                var psi = new ProcessStartInfo
+                {
+                    FileName = pandocPath,
+                    Arguments = $"\"{tempMd}\" -o \"{outPdf}\"   --pdf-engine=\"{wkhtmltopdfPath}\" ",
+                    CreateNoWindow = true,
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true
+                };
+
+                using (var p = Process.Start(psi))
+                {
+                    string stdErr = p.StandardError.ReadToEnd();
+                    string stdOut = p.StandardOutput.ReadToEnd();
+                    p.WaitForExit();
+                    if (p.ExitCode != 0)
+                    {
+                        // log stdErr
+                        MessageBox.Show("轉換失敗: " + stdErr);
+                    }
+                    else
+                    {
+                        // 成功
+                        Process.Start(new ProcessStartInfo(outPdf) { UseShellExecute = true });
+                    }
+                }
+
+                 
+            };
 
 
         }
@@ -267,6 +318,20 @@ namespace Markdown2Doc
             _logger.Information($"pandocPath = {pandocPath}");
             return true; 
         }
+
+        private bool CheckWkhtmlPath()
+        {
+            wkhtmltopdfPath = EnvUtils.GetString("wkhtmltopdfPath") ?? "";
+            if (string.IsNullOrEmpty(wkhtmltopdfPath))
+            {
+                MessageBox.Show(this, "Please Set wkhtmltopdf's Execute Path.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return false;
+            }
+
+            _logger.Information($"wkhtmltopdfPath = {wkhtmltopdfPath}");
+            return true;
+        }
+
 
         private bool CheckOutputPath()
         {
