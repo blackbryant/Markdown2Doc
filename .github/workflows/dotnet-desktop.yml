@@ -78,11 +78,14 @@ jobs:
           Write-Host "Detected version: $ver"
           "VERSION=$ver" | Out-File -Encoding utf8 -Append $env:GITHUB_ENV
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 9.0.x
-
+      #- name: Setup .NET
+      #  uses: actions/setup-dotnet@v4
+      #  with:
+      #    dotnet-version: 9.0.x
+      - name: Use system dotnet (verify)
+        if: steps.check-dotnet.outputs.dotnet_version != ''
+        run: dotnet --info
+      
       - name: Restore
         shell: powershell
         working-directory: ${{ env.REPO_PATH }}
