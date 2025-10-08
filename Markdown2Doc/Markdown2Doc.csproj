@@ -7,6 +7,22 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
     <ApplicationIcon>favicon.ico</ApplicationIcon>
+    <!-- 版本號由 CI 注入，不在這裡寫死 -->
+    <!-- 1) 預設本機版本（沒從 CI 注入時使用），可自行改 -->
+    <Version Condition="'$(Version)'==''">1.0.0</Version>
+
+    <!-- 2) 若是由 GitHub 用「tag 觸發」（例如 v1.3.0），自動把 v 去掉當成 Version -->
+    <_TagName Condition="'$(GITHUB_REF_TYPE)'=='tag'">$([System.String]::Copy('$(GITHUB_REF_NAME)'))</_TagName>
+    <_TagNameStripped Condition="'$(_TagName)'!=''">$([System.Text.RegularExpressions.Regex]::Replace('$(_TagName)', '^[vV]', ''))</_TagNameStripped>
+    <Version Condition="'$(Version)'=='' and '$(_TagNameStripped)'!=''">$(_TagNameStripped)</Version>
+
+    <!-- 3) FileVersion & InformationalVersion 預設跟 Version，同時把短 SHA 帶入（可追溯來源） -->
+    <FileVersion Condition="'$(FileVersion)'==''">$(Version)</FileVersion>
+    <InformationalVersion Condition="'$(InformationalVersion)'==''">$(Version)+$(GITHUB_SHA)</InformationalVersion>
+
+    <!-- 建 self-contained 單檔發佈時常用設定（可依需調整） -->
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
   </PropertyGroup>
 
   <ItemGroup>

@@ -5,9 +5,11 @@ using ScintillaNet.WinForms;
 using ScintillaNet.WinForms.Collections;
 using ScintillaNet.WinForms.EventArguments;
 using System.Diagnostics;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using Log = Serilog.Log;
+using System.Reflection;
 
 namespace Markdown2Doc
 {
@@ -62,7 +64,10 @@ namespace Markdown2Doc
 
         private void BuildUi()
         {
-            this.Text = "Markdown2Doc - Editor";
+            var ver = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+
+
+            this.Text = $"Markdown2Doc - {ver}";
             this.ClientSize = new Size(1100, 700);
 
             // toolbar
