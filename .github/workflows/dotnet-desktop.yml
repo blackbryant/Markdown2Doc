@@ -120,7 +120,7 @@ jobs:
           }
 
           # 執行 publish（注意路徑是相對於 working-directory）
-          dotnet publish "src/Markdown2Doc.csproj" -c Release -r win-x64 --self-contained true $versionArgs -o "artifacts/win-x64"
+          dotnet publish "Markdown2Doc/Markdown2Doc.csproj" -c Release -r win-x64 --self-contained true $versionArgs -o "artifacts/win-x64"
 
 
       - name: Upload artifact
