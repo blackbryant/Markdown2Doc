@@ -55,40 +55,38 @@ jobs:
             Pop-Location
           }
 
-      - name: Set VERSION from tag
+      - name: Set VERSION from tag (required)
+        if: startsWith(github.ref, 'refs/tags/')
         shell: powershell
         run: |
-          # GitHub sets GITHUB_REF_NAME when triggered by push:tags
-          $raw = $env:GITHUB_REF_NAME
-          if ([string]::IsNullOrEmpty($raw)) {
-            # fallback: try to find tag by sha (best-effort)
-            Write-Host "GITHUB_REF_NAME empty; try to resolve tag from sha"
-            $tag = git -C "${{ env.REPO_PATH }}" describe --tags --exact-match $env:GITHUB_SHA 2>$null
-            if (-not [string]::IsNullOrEmpty($tag)) {
-              $raw = $tag.Trim()
-            } else {
-              $raw = "0.0.0"
-            }
-          }
-          if ($raw -like 'v*') {
-            $ver = $raw.TrimStart('v')
-          } else {
-            $ver = $raw
-          }
-          Write-Host "Detected version: $ver"
-          "VERSION=$ver" | Out-File -Encoding utf8 -Append $env:GITHUB_ENV
+          # 只在 tag 觸發時執行（workflow 已設定 push: tags）
+          Write-Host "GITHUB_REF = [$env:GITHUB_REF]"
+          Write-Host "GITHUB_REF_NAME = [$env:GITHUB_REF_NAME]"
 
-      - name: Set VERSION from tag
-        if: startsWith(github.ref, 'refs/tags/')
-        shell: bash
+          if ([string]::IsNullOrEmpty($env:GITHUB_REF_NAME)) {
+            Write-Host "ERROR: GITHUB_REF_NAME is empty although ref indicates a tag. Aborting."
+            exit 1
+          }
+
+          # 去掉前綴 v (如果有)，直接把 tag 當成版本
+          $raw = $env:GITHUB_REF_NAME
+          if ($raw -like 'v*') { $ver = $raw.TrimStart('v') } else { $ver = $raw }
+
+          Write-Host "Using TAG as VERSION: $ver"
+          # 寫入到後續 steps 可用的環境變數
+          Add-Content -Path $env:GITHUB_ENV -Value "VERSION=$ver"
+
+      - name: show resolved version
+        shell: powershell
         run: |
-          RAW="${GITHUB_REF_NAME}"         # e.g. v1.3.0
-          echo "VERSION=${RAW#v}" >> $GITHUB_ENV  # -> 1.3.0
-          echo "GITHUB_REF=[$GITHUB_REF]"
-          echo "GITHUB_REF_NAME=[$GITHUB_REF_NAME]"
-          echo "VERSION env=[$VERSION]"
-          echo "MSBUILD_PROPS Version=[$(Version)]"
-            
+          Write-Host "---- Debug: environment ----"
+          Write-Host "GITHUB_REF = [$env:GITHUB_REF]"
+          Write-Host "GITHUB_REF_NAME = [$env:GITHUB_REF_NAME]"
+          Write-Host "VERSION (from env) = [$env:VERSION]"
+          dotnet --version || Write-Host "dotnet not found or not installed in PATH"
+
+
+
       #- name: Setup .NET
       #  uses: actions/setup-dotnet@v4
       #  with:
