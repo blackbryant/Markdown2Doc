@@ -76,7 +76,7 @@ namespace Markdown2Doc
             btnPdf = new ToolStripButton("Export PDF");
 
             toolStrip.Items.AddRange(new ToolStripItem[] 
-                {btnSetting, btnOpen, btnSave, new ToolStripSeparator(), btnExportHtml , btnWord, btnPdf});
+                {btnSetting, btnOpen, btnSave, new ToolStripSeparator(), btnExportHtml ,new ToolStripSeparator(), btnWord , new ToolStripSeparator(), btnPdf});
             toolStrip.Dock = DockStyle.Top;
             
             
