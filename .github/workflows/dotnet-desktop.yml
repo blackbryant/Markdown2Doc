@@ -15,7 +15,7 @@ jobs:
     steps:
       - name: Determine repo path (use local folder if exists)
         # Use PowerShell on Windows runners
-        shell: pwsh
+        shell: powershell
         run: |
           # <-- 修改這行為你本機的 repo 路徑（當 runner 在同一台機器上） -->
           $localPath = 'F:\source\Markdown2Doc\Markdown2Doc'
