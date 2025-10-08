@@ -1,0 +1,52 @@
+name: build-release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-tags: true
+
+      - name: Set VERSION from tag
+        shell: bash
+        run: |
+          RAW="${GITHUB_REF_NAME}"         # e.g. v1.3.0
+          echo "VERSION=${RAW#v}" >> $GITHUB_ENV  # -> 1.3.0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Publish win-x64 (self-contained)
+        run: >
+          dotnet publish src/Markdown2Doc.csproj
+          -c Release -r win-x64 --self-contained true
+          /p:Version=${{ env.VERSION }}
+          /p:FileVersion=${{ env.VERSION }}
+          /p:InformationalVersion=${{ env.VERSION }}+${{ github.sha }}
+          -o artifacts/win-x64
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Markdown2Doc-${{ env.VERSION }}-win-x64
+          path: artifacts/win-x64/*
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ env.VERSION }}
+          files: artifacts/win-x64/*
