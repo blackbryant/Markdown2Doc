@@ -8,19 +8,75 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    # 若你要在 self-hosted runner 上執行，改成 runs-on: [self-hosted, windows]
+    # 我這邊示範使用 self-hosted (windows)；如果要在 Github-hosted, 改回 windows-latest
+    runs-on: [self-hosted, windows]
 
     steps:
-      - name: Checkout
+      - name: Determine repo path (use local folder if exists)
+        # Use PowerShell on Windows runners
+        shell: pwsh
+        run: |
+          # <-- 修改這行為你本機的 repo 路徑（當 runner 在同一台機器上） -->
+          $localPath = 'F:\source\Markdown2Doc\Markdown2Doc'
+
+          if (Test-Path $localPath) {
+            Write-Host "Using existing local repo at $localPath"
+            "REPO_PATH=$localPath" | Out-File -Encoding utf8 -Append $env:GITHUB_ENV
+            # mark that we DO NOT need checkout
+            "NEED_CHECKOUT=false" | Out-File -Encoding utf8 -Append $env:GITHUB_ENV
+          } else {
+            Write-Host "Local repo NOT found at $localPath. Will use actions/checkout."
+            # Set REPO_PATH to runner workspace (actions/checkout will populate it)
+            "REPO_PATH=$env:GITHUB_WORKSPACE" | Out-File -Encoding utf8 -Append $env:GITHUB_ENV
+            "NEED_CHECKOUT=true" | Out-File -Encoding utf8 -Append $env:GITHUB_ENV
+          }
+
+      - name: Checkout repository (only if needed)
+        if: env.NEED_CHECKOUT == 'true'
         uses: actions/checkout@v4
         with:
+          fetch-depth: 0
           fetch-tags: true
 
-      - name: Set VERSION from tag
-        shell: bash
+      - name: If using local repo, ensure it's on correct commit (and fetch remote tags)
+        if: env.NEED_CHECKOUT == 'false'
+        shell: pwsh
         run: |
-          RAW="${GITHUB_REF_NAME}"         # e.g. v1.3.0
-          echo "VERSION=${RAW#v}" >> $GITHUB_ENV  # -> 1.3.0
+          $repo = "${{ env.REPO_PATH }}"
+          Write-Host "Repo path: $repo"
+          Push-Location $repo
+          try {
+            # fetch updates (safe: won't overwrite local uncommitted changes unless you want)
+            git fetch --all --tags
+            # Checkout the commit SHA that triggered this workflow (works when triggered by tag/sha)
+            git checkout --force $env:GITHUB_SHA
+          } finally {
+            Pop-Location
+          }
+
+      - name: Set VERSION from tag
+        shell: pwsh
+        run: |
+          # GitHub sets GITHUB_REF_NAME when triggered by push:tags
+          $raw = $env:GITHUB_REF_NAME
+          if ([string]::IsNullOrEmpty($raw)) {
+            # fallback: try to find tag by sha (best-effort)
+            Write-Host "GITHUB_REF_NAME empty; try to resolve tag from sha"
+            $tag = git -C "${{ env.REPO_PATH }}" describe --tags --exact-match $env:GITHUB_SHA 2>$null
+            if (-not [string]::IsNullOrEmpty($tag)) {
+              $raw = $tag.Trim()
+            } else {
+              $raw = "0.0.0"
+            }
+          }
+          if ($raw -like 'v*') {
+            $ver = $raw.TrimStart('v')
+          } else {
+            $ver = $raw
+          }
+          Write-Host "Detected version: $ver"
+          "VERSION=$ver" | Out-File -Encoding utf8 -Append $env:GITHUB_ENV
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -28,25 +84,30 @@ jobs:
           dotnet-version: 8.0.x
 
       - name: Restore
+        shell: pwsh
+        working-directory: ${{ env.REPO_PATH }}
         run: dotnet restore
 
       - name: Publish win-x64 (self-contained)
-        run: >
-          dotnet publish src/Markdown2Doc.csproj
-          -c Release -r win-x64 --self-contained true
-          /p:Version=${{ env.VERSION }}
-          /p:FileVersion=${{ env.VERSION }}
-          /p:InformationalVersion=${{ env.VERSION }}+${{ github.sha }}
-          -o artifacts/win-x64
+        shell: pwsh
+        working-directory: ${{ env.REPO_PATH }}
+        run: |
+          dotnet publish src/Markdown2Doc.csproj `
+            -c Release -r win-x64 --self-contained true `
+            /p:Version=${{ env.VERSION }} `
+            /p:FileVersion=${{ env.VERSION }} `
+            /p:InformationalVersion=${{ env.VERSION }}+${{ github.sha }} `
+            -o artifacts/win-x64
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: Markdown2Doc-${{ env.VERSION }}-win-x64
-          path: artifacts/win-x64/*
+          path: ${{ env.REPO_PATH }}/artifacts/win-x64/*
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ env.VERSION }}
-          files: artifacts/win-x64/*
+          files: ${{ env.REPO_PATH }}/artifacts/win-x64/*
+
