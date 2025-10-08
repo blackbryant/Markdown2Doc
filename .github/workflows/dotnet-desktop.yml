@@ -110,12 +110,18 @@ jobs:
         shell: powershell
         working-directory: ${{ env.REPO_PATH }}
         run: |
-          dotnet publish src/Markdown2Doc.csproj `
-            -c Release -r win-x64 --self-contained true `
-            /p:Version=${{ env.VERSION }} `
-            /p:FileVersion=${{ env.VERSION }} `
-            /p:InformationalVersion=${{ env.VERSION }}+${{ github.sha }} `
-            -o artifacts/win-x64
+          # 構建可選的 MSBuild 版本參數（如果 VERSION 有設定就帶上）
+          if ([string]::IsNullOrEmpty($env:VERSION)) {
+            Write-Host "VERSION is empty — publishing without /p:Version properties"
+            $versionArgs = ""
+          } else {
+            $versionArgs = "/p:Version=$env:VERSION /p:FileVersion=$env:VERSION /p:InformationalVersion=$($env:VERSION)+$($env:GITHUB_SHA)"
+            Write-Host "Using version args: $versionArgs"
+          }
+
+          # 執行 publish（注意路徑是相對於 working-directory）
+          dotnet publish "src/Markdown2Doc.csproj" -c Release -r win-x64 --self-contained true $versionArgs -o "artifacts/win-x64"
+
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
