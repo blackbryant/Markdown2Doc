@@ -76,14 +76,20 @@ jobs:
           # 寫入到後續 steps 可用的環境變數
           Add-Content -Path $env:GITHUB_ENV -Value "VERSION=$ver"
 
-      - name: show resolved version
+      - name: show resolved version (Get-Command)
         shell: powershell
         run: |
           Write-Host "---- Debug: environment ----"
           Write-Host "GITHUB_REF = [$env:GITHUB_REF]"
           Write-Host "GITHUB_REF_NAME = [$env:GITHUB_REF_NAME]"
           Write-Host "VERSION (from env) = [$env:VERSION]"
-          dotnet --version || Write-Host "dotnet not found or not installed in PATH"
+      
+          $cmd = Get-Command dotnet -ErrorAction SilentlyContinue
+          if ($null -eq $cmd) {
+            Write-Host "dotnet not found or not installed in PATH"
+          } else {
+            & $cmd.Source --version
+          }
 
 
 
