@@ -1,4 +1,5 @@
-﻿using Serilog;
+﻿using ScintillaNet.Abstractions.Classes.Lexers;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -82,8 +83,11 @@ namespace Markdown2Doc
                 var info = await PandocDetector.DetectPandocAsync(cts.Token);
                 if (info != null)
                 {
-                    MessageBox.Show($"找到 pandoc：{info.Version}\n位置：{info.Path}");
+                    //MessageBox.Show($"找到 pandoc：{info.Version}\n位置：{info.Path}");
                     // 可把路徑顯示在 textbox
+                    var r1 = MessageBox.Show( $"目前路徑{info.Path}", "是否重新設定 pandoc 路徑？", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                    SavePandocPath(r1);
+
 
 
                     if (string.IsNullOrWhiteSpace(txtEnvPath.Text))
@@ -101,25 +105,26 @@ namespace Markdown2Doc
                 else
                 {
                     var r = MessageBox.Show("系統找不到 pandoc。是否手動指定 pandoc.exe？", "Pandoc 未找到", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                    if (r == DialogResult.Yes)
-                    {
-                        var chosen = PandocDetector.AskUserToLocatePandocFile(this);
-                        if (!string.IsNullOrWhiteSpace(chosen))
-                        {
-                            // 驗證並儲存
-                            var validated = await PandocDetector.TryValidatePandocPathAsync(chosen);
-                            if (validated != null)
-                            {
-                                PandocDetector.SaveUserSelectedPath(validated.Path);
-                                MessageBox.Show($"已儲存 pandoc：{validated.Version}\n{validated.Path}");
-                                txtEnvPath.Text = validated.Path;
-                            }
-                            else
-                            {
-                                MessageBox.Show("所選檔案不是有效的 pandoc 可執行檔。");
-                            }
-                        }
-                    }
+                    SavePandocPath(r);
+                    //if (r == DialogResult.Yes)
+                    //{
+                    //    var chosen = PandocDetector.AskUserToLocatePandocFile(this);
+                    //    if (!string.IsNullOrWhiteSpace(chosen))
+                    //    {
+                    //        // 驗證並儲存
+                    //        var validated = await PandocDetector.TryValidatePandocPathAsync(chosen);
+                    //        if (validated != null)
+                    //        {
+                    //            PandocDetector.SaveUserSelectedPath(validated.Path);
+                    //            MessageBox.Show($"已儲存 pandoc：{validated.Version}\n{validated.Path}");
+                    //            txtEnvPath.Text = validated.Path;
+                    //        }
+                    //        else
+                    //        {
+                    //            MessageBox.Show("所選檔案不是有效的 pandoc 可執行檔。");
+                    //        }
+                    //    }
+                    //}
                 }
             }
             catch (OperationCanceledException)
@@ -182,8 +187,12 @@ namespace Markdown2Doc
                 var info = await WkHtmlToPdfDetector.DetectWkhtmlAsync(cts.Token);
                 if (info != null)
                 {
-                    MessageBox.Show($"找到 wkhtmltopdf：{info.Version}\n位置：{info.Path}");
+                    //MessageBox.Show($"找到 wkhtmltopdf：{info.Version}\n位置：{info.Path}");
                     // 把路徑顯示到 textbox（請把 txtWkPath 換成你實際控制項名稱）
+                    var r1 = MessageBox.Show($"目前路徑{info.Path}", "是否重設 wkhtmltopdf 路徑？", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                    SaveWkHtmlToPdfPath(r1);
+                    
+                    
                     txtWkPath.Text = info.Path;
 
                     if (string.IsNullOrWhiteSpace(txtWkPath.Text) || string.IsNullOrWhiteSpace(EnvUtils.GetString("wkhtmltopdfPath")))
@@ -199,24 +208,25 @@ namespace Markdown2Doc
                 else
                 {
                     var r = MessageBox.Show("系統找不到 wkhtmltopdf。是否手動指定 wkhtmltopdf.exe？", "wkhtmltopdf 未找到", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                    if (r == DialogResult.Yes)
-                    {
-                        var chosen = WkHtmlToPdfDetector.AskUserToLocateWkhtmlFile(this);
-                        if (!string.IsNullOrWhiteSpace(chosen))
-                        {
-                            var validated = await WkHtmlToPdfDetector.TryValidateWkhtmlPathAsync(chosen, CancellationToken.None);
-                            if (validated != null)
-                            {
-                                WkHtmlToPdfDetector.SaveUserSelectedPath(validated.Path);
-                                MessageBox.Show($"已儲存 wkhtmltopdf：{validated.Version}\n{validated.Path}");
-                                txtWkPath.Text = validated.Path;
-                            }
-                            else
-                            {
-                                MessageBox.Show("所選檔案不是有效的 wkhtmltopdf 可執行檔。");
-                            }
-                        }
-                    }
+                    SaveWkHtmlToPdfPath(r);
+                    //if (r == DialogResult.Yes)
+                    //{
+                    //    var chosen = WkHtmlToPdfDetector.AskUserToLocateWkhtmlFile(this);
+                    //    if (!string.IsNullOrWhiteSpace(chosen))
+                    //    {
+                    //        var validated = await WkHtmlToPdfDetector.TryValidateWkhtmlPathAsync(chosen, CancellationToken.None);
+                    //        if (validated != null)
+                    //        {
+                    //            WkHtmlToPdfDetector.SaveUserSelectedPath(validated.Path);
+                    //            MessageBox.Show($"已儲存 wkhtmltopdf：{validated.Version}\n{validated.Path}");
+                    //            txtWkPath.Text = validated.Path;
+                    //        }
+                    //        else
+                    //        {
+                    //            MessageBox.Show("所選檔案不是有效的 wkhtmltopdf 可執行檔。");
+                    //        }
+                    //    }
+                    //}
                 }
             }
             catch (OperationCanceledException)
@@ -235,6 +245,53 @@ namespace Markdown2Doc
             string? wkPath = EnvUtils.GetString("wkhtmltopdfPath");
             _logger?.Information($"wkhtmltopdfPath = {wkPath}");
         }
+
+        //////////////////////////// component ///////////////////////
+        public async void  SavePandocPath( DialogResult  r )
+        {
+            if (r == DialogResult.Yes)
+            {
+                var chosen = PandocDetector.AskUserToLocatePandocFile(this);
+                if (!string.IsNullOrWhiteSpace(chosen))
+                {
+                    // 驗證並儲存
+                    var validated = await PandocDetector.TryValidatePandocPathAsync(chosen);
+                    if (validated != null)
+                    {
+                        PandocDetector.SaveUserSelectedPath(validated.Path);
+                        MessageBox.Show($"已儲存 pandoc：{validated.Version}\n{validated.Path}");
+                        txtEnvPath.Text = validated.Path;
+                    }
+                    else
+                    {
+                        MessageBox.Show("所選檔案不是有效的 pandoc 可執行檔。");
+                    }
+                }
+            }
+        }
+
+        public async void SaveWkHtmlToPdfPath(DialogResult r)
+        {
+            if (r == DialogResult.Yes)
+            {
+                var chosen = WkHtmlToPdfDetector.AskUserToLocateWkhtmlFile(this);
+                if (!string.IsNullOrWhiteSpace(chosen))
+                {
+                    var validated = await WkHtmlToPdfDetector.TryValidateWkhtmlPathAsync(chosen, CancellationToken.None);
+                    if (validated != null)
+                    {
+                        WkHtmlToPdfDetector.SaveUserSelectedPath(validated.Path);
+                        MessageBox.Show($"已儲存 wkhtmltopdf：{validated.Version}\n{validated.Path}");
+                        txtWkPath.Text = validated.Path;
+                    }
+                    else
+                    {
+                        MessageBox.Show("所選檔案不是有效的 wkhtmltopdf 可執行檔。");
+                    }
+                }
+            }
+        }
+
 
 
     }
