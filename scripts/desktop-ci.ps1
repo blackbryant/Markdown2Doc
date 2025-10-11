@@ -1,8 +1,8 @@
 ﻿
 # Window Environment
 param(
-  [string]$ProjectFile = "F:\source\Markdown2Doc\Markdown2Doc\Markdown2Doc.csproj",
-  [string]$ThirdPartyDir = "F:\source\Markdown2Doc\Markdown2Doc\bin\Debug\net8.0-windows\",
+  [string]$ProjectFile = "Markdown2Doc\Markdown2Doc.csproj",
+  [string]$ThirdPartyDir = "Markdown2Doc\bin\Debug\net8.0-windows\",
   [string]$PublishDir = "installer\artifacts\win-x64",
   [string]$Runtime = "win-x64",
   [string]$Configuration = "Release",
@@ -10,7 +10,7 @@ param(
   [switch]$DoRelease                   # 本機僅影響檔名格式，不會上傳
 )
 
-
+$projRoot  = Split-Path $ProjectFile -Parent
 $srcX64 = Join-Path $ThirdPartyDir "x64"
 $srcX86 = Join-Path $ThirdPartyDir "x86"
 $dstX64 = Join-Path $PublishDir "x64"
