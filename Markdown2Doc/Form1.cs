@@ -1,15 +1,12 @@
 using Markdig;
 using Pandoc;
 using ScintillaNet.Abstractions.Enumerations;
-using ScintillaNet.WinForms;
-using ScintillaNet.WinForms.Collections;
-using ScintillaNet.WinForms.EventArguments;
+using ScintillaNET;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using Log = Serilog.Log;
-using System.Reflection;
 
 namespace Markdown2Doc
 {
@@ -101,7 +98,7 @@ namespace Markdown2Doc
             scintilla = new Scintilla
             {
                 Dock = DockStyle.Fill,
-                WrapMode = WrapMode.None,
+                WrapMode = ScintillaNET.WrapMode.None,
                 Font = new Font("Consolas", 12),
                 AccessibilityObject = { Name = "Markdown Editor" },
                  
@@ -109,7 +106,7 @@ namespace Markdown2Doc
             scintilla.FirstVisibleLine = 0;
 
             // line numbers margin
-            scintilla.Margins[0].Type = MarginType.Number;
+            scintilla.Margins[0].Type = ScintillaNET.MarginType.Number;
             scintilla.Margins[0].Width = 100;
             split.Panel1.Controls.Add(scintilla);
 

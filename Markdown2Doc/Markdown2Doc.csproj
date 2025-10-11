@@ -3,6 +3,7 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -28,8 +29,9 @@
   <ItemGroup>
     <PackageReference Include="Markdig" Version="0.42.0" />
     <PackageReference Include="Pandoc" Version="3.3.0" />
+    <PackageReference Include="Scintilla.NET" Version="5.3.2.9" />
     <PackageReference Include="Scintilla.NET.Abstractions" Version="1.0.11" />
-    <PackageReference Include="Scintilla.NET.WinForms" Version="1.0.11.5320" />
+
     <PackageReference Include="Serilog" Version="4.3.0" />
     <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
     <PackageReference Include="Serilog.Settings.Configuration" Version="9.0.0" />
@@ -52,5 +54,6 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
+  
 
 </Project>

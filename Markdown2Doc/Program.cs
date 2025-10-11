@@ -1,9 +1,14 @@
 using Serilog;
+using System.Runtime.InteropServices;
 
 namespace Markdown2Doc
 {
     internal static class Program
     {
+
+        [DllImport("kernel32", SetLastError = true)]
+        private static extern bool SetDllDirectory(string lpPathName);
+
         /// <summary>
         ///  The main entry point for the application.
         /// </summary>
@@ -12,6 +17,17 @@ namespace Markdown2Doc
         {
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
+
+
+            //
+            // 指向 x64 或 x86 子資料夾（視你的建置/處理序位元數）
+            var baseDir = AppContext.BaseDirectory;
+            var archDir = Path.Combine(baseDir, Environment.Is64BitProcess ? "x64" : "x86");
+            if (Directory.Exists(archDir))
+            {
+                SetDllDirectory(archDir);
+            }
+
 
             Log.Logger = new LoggerConfiguration()
              .MinimumLevel.Debug()

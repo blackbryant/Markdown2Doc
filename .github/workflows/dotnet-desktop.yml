@@ -1,138 +1,65 @@
-name: build-release
+name: Dotnet Desktop
 
 on:
-  push:
-    tags:
-      - "v*"
   workflow_dispatch:
+    inputs:
+      version:
+        type: string
+        default: 'auto'
+
+  push:
+    tags: ['v*']     # 推 tag 時會帶入版號
+
+permissions:
+  contents: write
 
 jobs:
   build:
-    # 若你要在 self-hosted runner 上執行，改成 runs-on: [self-hosted, windows]
-    # 我這邊示範使用 self-hosted (windows)；如果要在 Github-hosted, 改回 windows-latest
-    runs-on: [self-hosted, windows]
-
+    runs-on: windows-latest
     steps:
-      - name: Determine repo path (use local folder if exists)
-        # Use PowerShell on Windows runners
-        shell: powershell
-        run: |
-          # <-- 修改這行為你本機的 repo 路徑（當 runner 在同一台機器上） -->
-          $localPath = 'F:\source\Markdown2Doc\Markdown2Doc'
+      - uses: actions/checkout@v4
 
-          if (Test-Path $localPath) {
-            Write-Host "Using existing local repo at $localPath"
-            "REPO_PATH=$localPath" | Out-File -Encoding utf8 -Append $env:GITHUB_ENV
-            # mark that we DO NOT need checkout
-            "NEED_CHECKOUT=false" | Out-File -Encoding utf8 -Append $env:GITHUB_ENV
-          } else {
-            Write-Host "Local repo NOT found at $localPath. Will use actions/checkout."
-            # Set REPO_PATH to runner workspace (actions/checkout will populate it)
-            "REPO_PATH=$env:GITHUB_WORKSPACE" | Out-File -Encoding utf8 -Append $env:GITHUB_ENV
-            "NEED_CHECKOUT=true" | Out-File -Encoding utf8 -Append $env:GITHUB_ENV
-          }
-
-      - name: Checkout repository (only if needed)
-        if: env.NEED_CHECKOUT == 'true'
-        uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
         with:
-          fetch-depth: 0
-          fetch-tags: true
+          dotnet-version: '9.0.x'
 
-      - name: If using local repo, ensure it's on correct commit (and fetch remote tags)
-        if: env.NEED_CHECKOUT == 'false'
-        shell: powershell
+      - name: Resolve version
+        id: ver
+        shell: pwsh
         run: |
-          $repo = "${{ env.REPO_PATH }}"
-          Write-Host "Repo path: $repo"
-          Push-Location $repo
-          try {
-            # fetch updates (safe: won't overwrite local uncommitted changes unless you want)
-            git fetch --all --tags
-            # Checkout the commit SHA that triggered this workflow (works when triggered by tag/sha)
-            git checkout --force $env:GITHUB_SHA
-          } finally {
-            Pop-Location
-          }
-
-      - name: Set VERSION from tag (required)
-        if: startsWith(github.ref, 'refs/tags/')
-        shell: powershell
-        run: |
-          # 只在 tag 觸發時執行（workflow 已設定 push: tags）
-          Write-Host "GITHUB_REF = [$env:GITHUB_REF]"
-          Write-Host "GITHUB_REF_NAME = [$env:GITHUB_REF_NAME]"
-
-          if ([string]::IsNullOrEmpty($env:GITHUB_REF_NAME)) {
-            Write-Host "ERROR: GITHUB_REF_NAME is empty although ref indicates a tag. Aborting."
-            exit 1
-          }
-
-          # 去掉前綴 v (如果有)，直接把 tag 當成版本
-          $raw = $env:GITHUB_REF_NAME
-          if ($raw -like 'v*') { $ver = $raw.TrimStart('v') } else { $ver = $raw }
-
-          Write-Host "Using TAG as VERSION: $ver"
-          # 寫入到後續 steps 可用的環境變數
-          Add-Content -Path $env:GITHUB_ENV -Value "VERSION=$ver"
-
-      - name: show resolved version (Get-Command)
-        shell: powershell
-        run: |
-          Write-Host "---- Debug: environment ----"
-          Write-Host "GITHUB_REF = [$env:GITHUB_REF]"
-          Write-Host "GITHUB_REF_NAME = [$env:GITHUB_REF_NAME]"
-          Write-Host "VERSION (from env) = [$env:VERSION]"
-      
-          $cmd = Get-Command dotnet -ErrorAction SilentlyContinue
-          if ($null -eq $cmd) {
-            Write-Host "dotnet not found or not installed in PATH"
+          if ("${{ github.ref }}" -like "refs/tags/v*") {
+            $v = "${{ github.ref }}".Replace("refs/tags/v","")
+          } elseif ("${{ inputs.version }}" -ne "") {
+            $v = "${{ inputs.version }}"
           } else {
-            & $cmd.Source --version
+            $short = "${{ github.sha }}".Substring(0,7)
+            $v = "0.0.0+run.${{ github.run_number }}-$short"
           }
+          "VERSION=$v" | Out-File -FilePath $env:GITHUB_ENV -Append
+          Write-Host "VERSION=$v"
 
+      - name: Run shared CI script
+        shell: pwsh
+        run: pwsh -File scripts/desktop-ci.ps1 -Version "${{ env.VERSION }}" -DoRelease
 
-
-      #- name: Setup .NET
-      #  uses: actions/setup-dotnet@v4
-      #  with:
-      #    dotnet-version: 9.0.x
-      - name: Use system dotnet (verify)
-        if: steps.check-dotnet.outputs.dotnet_version != ''
-        run: dotnet --info
-      
-      - name: Restore
-        shell: powershell
-        working-directory: ${{ env.REPO_PATH }}
-        run: dotnet restore
-
-      - name: Publish win-x64 (self-contained)
-        shell: powershell
-        working-directory: ${{ env.REPO_PATH }}
-        run: |
-          # 構建可選的 MSBuild 版本參數（如果 VERSION 有設定就帶上）
-          if ([string]::IsNullOrEmpty($env:VERSION)) {
-            Write-Host "VERSION is empty — publishing without /p:Version properties"
-            $versionArgs = ""
-          } else {
-            $versionArgs = "/p:Version=$env:VERSION /p:FileVersion=$env:VERSION /p:InformationalVersion=$($env:VERSION)+$($env:GITHUB_SHA)"
-            Write-Host "Using version args: $versionArgs"
-          }
-
-          # 執行 publish（注意路徑是相對於 working-directory）
-          
-          dotnet publish "F:\source\Markdown2Doc\Markdown2Doc\Markdown2Doc.csproj" -c Release -r win-x64 --self-contained true $versionArgs -o "artifacts/win-x64"
-
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
-          name: Markdown2Doc-${{ env.VERSION }}-win-x64
-          path: ${{ env.REPO_PATH }}/artifacts/win-x64/*
+          name: build-${{ env.VERSION }}
+          path: |
+            installer/artifacts/**/*
+            installer/artifacts/output/*
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: windows-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { path: dist }
+      - uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ env.VERSION }}
-          files: ${{ env.REPO_PATH }}/artifacts/win-x64/*
-
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          files: |
+            dist/**/*.zip
+            dist/**/Markdown2Doc-Setup-*.exe
