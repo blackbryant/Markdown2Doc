@@ -22,12 +22,16 @@ $ErrorActionPreference = "Stop"
 
 function Resolve-Version {
   param([string]$Version)
-  if ($Version -and $Version -ne "auto") { return $Version }
+
   # auto：用 run number + 短 SHA 模擬；在本機就用時間戳替代
-  $ts = Get-Date -Format "yyyyMMdd-HHmm"
-  $short = (git rev-parse --short=7 HEAD) 2>$null
-  if (-not $short) { $short = "local" }
-  return "0.0.0+local.$ts-$short"
+  #$ts = Get-Date -Format "yyyyMMdd-HHmm"
+  #$short = (git rev-parse --short=7 HEAD) 2>$null
+  #if (-not $short) { $short = "local" }
+  $repo = "blackbryant/Markdown2Doc"
+  $relTag = gh release view --repo $repo --json tagName -q ".tagName"
+  $Version = $relTag.Trim() -replace '^[vV]', ''
+  
+  return $Version
 }
 
 $version = Resolve-Version -Version $Version
