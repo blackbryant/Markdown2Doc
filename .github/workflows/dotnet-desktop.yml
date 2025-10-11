@@ -39,8 +39,8 @@ jobs:
           Write-Host "VERSION=$v"
 
       - name: Run shared CI script
-        shell: pwsh
-        run: pwsh -File scripts/desktop-ci.ps1 -Version "${{ env.VERSION }}" -DoRelease
+        shell: powershell
+        run: powershell -File scripts/desktop-ci.ps1 -Version "${{ env.VERSION }}" -DoRelease
 
       - uses: actions/upload-artifact@v4
         with:
