@@ -12,5 +12,17 @@ Markdown2Doc 是一款輕量且直覺的 Windows 應用，專為需將 Markdown 
 Markdown2Doc 可以直接匯入或貼上這些平台輸出的 Markdown，並快速轉成各種可分享或列印的檔案，方便整合到你的內容工作流程中。
 
 
+### 操作如下
+#### 1.開啟 Markdown2Doc 應用程式。
+
+
+
+#### 2. 在主介面中，選擇「設定」選項。
+
+
+#### 3. 在處畫面中，選擇「匯出格式」選項，選擇你想要的輸出格式（如 DOCX、HTML、PDF 等）。
+
+從chatgpt、Notion 等平台複製 Markdown 原始碼，或直接匯入 Markdown 檔案，直接貼上[Markdown輸入文字框]中，然後匯出需要的格式
+
 
 
