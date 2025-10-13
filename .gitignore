@@ -64,6 +64,8 @@ appsettings.*.Local.json
 # Packages / library folders sometimes used
 lib/
 packages/
+installer/artifacts
+installer/output
 
 # Generated files you typically don't need to track
 # (注意：Designer.cs 檔通常要 commit，別忽略)

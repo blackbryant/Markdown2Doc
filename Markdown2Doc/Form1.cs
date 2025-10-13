@@ -416,7 +416,7 @@ namespace Markdown2Doc
 
         private string WrapHtml(string bodyHtml)
         {
-                        return $@"<!doctype html>
+            return $@"<!doctype html>
             <html>
             <head><meta charset='utf-8'>
             <style>

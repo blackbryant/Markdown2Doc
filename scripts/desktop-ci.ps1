@@ -6,7 +6,7 @@ param(
   [string]$PublishDir = "installer\artifacts\win-x64",
   [string]$Runtime = "win-x64",
   [string]$Configuration = "Release",
-  [string]$Version = "auto",           # auto 或 直接給 1.2.3
+  [string]$VersionTag = "v1.0.3",           # auto 或 直接給 1.2.3
   [switch]$DoRelease                   # 本機僅影響檔名格式，不會上傳
 )
 
@@ -27,9 +27,7 @@ function Resolve-Version {
   #$ts = Get-Date -Format "yyyyMMdd-HHmm"
   #$short = (git rev-parse --short=7 HEAD) 2>$null
   #if (-not $short) { $short = "local" }
-  $repo = "blackbryant/Markdown2Doc"
-  $relTag = gh release view --repo $repo --json tagName -q ".tagName"
-  $Version = $relTag.Trim() -replace '^[vV]', ''
+  $Version = $VersionTag.Trim() -replace '^[vV]', ''
   
   return $Version
 }
@@ -64,12 +62,7 @@ dotnet publish $ProjectFile `
   -p:InformationalVersion=$version `
   -o $PublishDir
 
-# 建立可攜式 zip
-$portableName = if ($DoRelease) { "Markdown2Doc-portable-$version.zip" } else { "Markdown2Doc-portable-$version.zip" }
-$portablePath = Join-Path "installer\artifacts" $portableName
-if (Test-Path $portablePath) { Remove-Item $portablePath -Force }
-Write-Host "==> Zip portable => $portablePath"
-Compress-Archive -Path "$PublishDir\*" -DestinationPath $portablePath -Force
+
 
 if (Test-Path $srcX64) {
   New-Item -ItemType Directory -Force -Path $dstX64 | Out-Null
@@ -86,6 +79,13 @@ if (Test-Path $srcX86) {
 } else {
   Write-Host "==> Skip: $srcX86 not found"
 }
+
+# 建立可攜式 zip
+$portableName = if ($DoRelease) { "Markdown2Doc-portable-$version.zip" } else { "Markdown2Doc-portable-$version.zip" }
+$portablePath = Join-Path "installer\artifacts" $portableName
+if (Test-Path $portablePath) { Remove-Item $portablePath -Force }
+Write-Host "==> Zip portable => $portablePath"
+Compress-Archive -Path "$PublishDir\*" -DestinationPath $portablePath -Force
 
 
 function Find-Iscc {
@@ -116,7 +116,7 @@ function Find-Iscc {
   throw '找不到 Inno Setup 的 ISCC.exe。請先安裝 Inno Setup 6，或把其路徑加入 PATH。'
 }
 
-$IssPublishDir =  (Resolve-Path "$PublishDir\..").Path
+$IssPublishDir =  (Resolve-Path "$PublishDir").Path
 
 $ISCC = Find-Iscc
 Write-Host "==> Compile installer with Inno Setup"
