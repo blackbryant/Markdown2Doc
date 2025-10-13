@@ -3,9 +3,7 @@
 #define MyAppURL "https://github.com/blackbryant/Markdown2Doc"
 #define MyAppExeName "Markdown2Doc.exe"
 
-#ifndef MyAppVersion
-  #define MyAppVersion "1.0.2"
-#endif
+
 #ifndef MyPublishDir
   #define MyPublishDir "artifacts\win-x64"
 #endif

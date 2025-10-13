@@ -3,7 +3,9 @@
 
 # 讀版本號（你腳本已回傳 ResolvedVersion，可寫入檔或用參數傳出）
 $repo = "blackbryant/Markdown2Doc"
-$tag = gh release view --repo $repo --json tagName -q ".tagName"
+#$tag = gh release view --repo $repo --json tagName -q ".tagName"
+#$Version = $tag.Trim() -replace '^[vV]', ''
+$tag = "v1.0.3"
 $Version = $tag.Trim() -replace '^[vV]', ''
 
 $tag
