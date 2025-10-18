@@ -1,0 +1,6 @@
+﻿<Project>
+  <PropertyGroup>
+    <!-- 只改這裡 -->
+    <VersionPrefix>1.0.4</VersionPrefix>
+  </PropertyGroup>
+</Project>

@@ -6,7 +6,6 @@ param(
   [string]$PublishDir = "installer\artifacts\win-x64",
   [string]$Runtime = "win-x64",
   [string]$Configuration = "Release",
-  [string]$VersionTag = "v1.0.3",           # auto 或 直接給 1.2.3
   [switch]$DoRelease                   # 本機僅影響檔名格式，不會上傳
 )
 
@@ -15,24 +14,24 @@ $srcX64 = Join-Path $ThirdPartyDir "x64"
 $srcX86 = Join-Path $ThirdPartyDir "x86"
 $dstX64 = Join-Path $PublishDir "x64"
 $dstX86 = Join-Path $PublishDir "x86"
-
-
+$srcTwemoji = Join-Path $ThirdPartyDir "twemoji"
+$dstTwemoji = Join-Path $PublishDir "twemoji"
 
 $ErrorActionPreference = "Stop"
 
-function Resolve-Version {
-  param([string]$Version)
 
-  # auto：用 run number + 短 SHA 模擬；在本機就用時間戳替代
-  #$ts = Get-Date -Format "yyyyMMdd-HHmm"
-  #$short = (git rev-parse --short=7 HEAD) 2>$null
-  #if (-not $short) { $short = "local" }
-  $Version = $VersionTag.Trim() -replace '^[vV]', ''
+function Get-VersionFromProps {
+  param([string]$propsPath = "$projRoot/version.props")
+  if (-not (Test-Path $propsPath)) { throw "找不到 $propsPath" }
+  [xml]$xml = Get-Content $propsPath
+  $VersionTag = $xml.Project.PropertyGroup.VersionPrefix
   
-  return $Version
+  return $VersionTag 
 }
 
-$version = Resolve-Version -Version $Version
+
+#$version = Resolve-Version -Version $Version
+$version = Get-VersionFromProps
 Write-Host "==> Version: $version"
 
 # 清理輸出
@@ -79,6 +78,15 @@ if (Test-Path $srcX86) {
 } else {
   Write-Host "==> Skip: $srcX86 not found"
 }
+
+if (Test-Path $srcTwemoji) {
+  New-Item -ItemType Directory -Force -Path $dstX86 | Out-Null
+  Copy-Item "$srcTwemoji\*" $dstTwemoji -Recurse -Force
+  Write-Host "==> Copied twemoji native files to $dstTwemoji"
+} else {
+  Write-Host "==> Skip: $srcTwemoji not found"
+}
+
 
 # 建立可攜式 zip
 $portableName = if ($DoRelease) { "Markdown2Doc-portable-$version.zip" } else { "Markdown2Doc-portable-$version.zip" }

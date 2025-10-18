@@ -1,5 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <Import Project="version.props" />
+
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
@@ -8,10 +10,6 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
     <ApplicationIcon>favicon.ico</ApplicationIcon>
-    <!-- 版本號由 CI 注入，不在這裡寫死 -->
-    <!-- 1) 預設本機版本（沒從 CI 注入時使用），可自行改 -->
-    <Version Condition="'$(Version)'==''">1.0.3</Version>
-    <!-- 建 self-contained 單檔發佈時常用設定（可依需調整） -->
     <PublishSingleFile>true</PublishSingleFile>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
   </PropertyGroup>
@@ -44,6 +42,15 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
-  
+  <!-- 這段是關鍵：把你的 Pandoc 設定與模板一起輸出 -->
+  <ItemGroup>
 
+    <None Update="twemoji\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </None>
+    
+  </ItemGroup>
+  
+  
 </Project>

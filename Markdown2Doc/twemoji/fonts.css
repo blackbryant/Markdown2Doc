@@ -1,0 +1,6 @@
+﻿/* css/emoji.css */
+img.emoji {
+    width: 18px; /* 依你的字級調整 */
+    height: 18px;
+    vertical-align: -3px; /* 微調基線 */
+}

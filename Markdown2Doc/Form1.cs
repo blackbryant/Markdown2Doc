@@ -258,6 +258,12 @@ namespace Markdown2Doc
 
             btnPdf.Click += (s, e) =>
             {
+                if (!CheckPandocPath())
+                {
+                    MessageBox.Show(this, "Word export not implemented yet.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
                 if (!CheckWkhtmlPath())
                 {
                     MessageBox.Show(this, "PDF export not implemented yet.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -278,7 +284,16 @@ namespace Markdown2Doc
                 var psi = new ProcessStartInfo
                 {
                     FileName = pandocPath,
-                    Arguments = $"\"{tempMd}\" -o \"{outPdf}\"   --pdf-engine=\"{wkhtmltopdfPath}\" ",
+                    // Arguments = $"\"{tempMd}\" -o \"{outPdf}\"   --pdf-engine=\"{wkhtmltopdfPath}\" --metadata-file=emoji.yaml",
+                    //  Arguments = $"\"{tempMd}\"  --pdf-engine=\"{wkhtmltopdfPath}\" --metadata-file=emoji.yaml "+
+                    //  "--pdf-engine-opt=--enable-local-file-access  --pdf-engine-opt=--javascript-delay --pdf-engine-opt=1500  "
+                    //  + " -o \"{outPdf}\"   ",
+
+                    Arguments = $"\"{tempMd}\"  -f gfm+raw_html -t html5  --pdf-engine=\"{wkhtmltopdfPath}\"  --css \"twemoji\\fonts.css\"  " +
+                                          $"  --lua-filter=twemoji\\twemoji.lua  --embed-resources  --resource-path=\"twemoji\\72x72;css\"" +
+                                          $" -o \"{outPdf}\"   " +
+                                          $"   -V wkhtmltopdf_args=\"--enable-local-file-access --print-media-type --dpi 300\"  " 
+                                        ,
                     CreateNoWindow = true,
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
